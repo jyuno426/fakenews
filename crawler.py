@@ -2,6 +2,7 @@
 
 import requests
 from bs4 import BeautifulSoup
+from selenium import webdriver
 
 
 def crawl_raw_html(url):
@@ -62,8 +63,7 @@ def crawl_snu_factcheck():
             reference_url = ""
             # reference_content = ""
             try:
-                reference_url = content.find("a",
-                                             {"class": "reference"})["href"]
+                reference_url = content.find("a", {"class": "reference"})["href"]
                 # reference_content = beautifulize(
                 #     crawl_raw_html(reference_url)).text
             except TypeError:
@@ -71,15 +71,40 @@ def crawl_snu_factcheck():
 
             detail_url = base_url + content.find("a")["href"]
             detail_content = beautifulize(crawl_raw_html(detail_url))
-            title = detail_content.find("div", {
-                "class": "fcItem_detail_li_p"
-            }).find("a").text.replace("\n", " ").strip()
+            title = (
+                detail_content.find("div", {"class": "fcItem_detail_li_p"})
+                .find("a")
+                .text.replace("\n", " ")
+                .strip()
+            )
 
             ind = "@@@@"
             with open("res.txt", "a+") as f:
-                f.write(id + ind + title + ind + str(score) + ind +
-                        reference_url + "\n")
+                f.write(
+                    id + ind + title + ind + str(score) + ind + reference_url + "\n"
+                )
 
 
-if __name__ == '__main__':
-    crawl_snu_factcheck()
+def get_article():
+    try:
+        driver = webdriver.Chrome("./chromedriver")
+    except:
+        driver = webdriver.Chrome("./chromedriver.exe")
+    driver.implicitly_wait(5)
+
+    with open("res.txt", "r") as f:
+        for line in f.readlines():
+            id, _, _, reference_url = line.strip().split("@@@@")
+            with open("articles/" + id + ".txt", "w") as g:
+                # try:
+                driver.get(reference_url)
+                text = driver.find_element_by_tag_name("body").text.replace("\n", " ")
+                g.write(text + "\n")
+                # except:
+                driver.quit()
+                break
+
+
+if __name__ == "__main__":
+    # crawl_snu_factcheck()
+    get_article()
