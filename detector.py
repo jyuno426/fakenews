@@ -1,40 +1,63 @@
 # -*- coding:utf-8 -*-
 
-import torch
-import gluonnlp as nlp
-from kobert.utils import get_tokenizer
-from gluonnlp.data import SentencepieceTokenizer
-from kobert.pytorch_kobert import get_pytorch_kobert_model
-
-# input_ids = torch.LongTensor([[31, 51, 99], [15, 5, 0]])
-# input_mask = torch.LongTensor([[1, 1, 1], [1, 1, 0]])
-# token_type_ids = torch.LongTensor([[0, 0, 1], [0, 1, 0]])
-# bert_model, vocab = get_pytorch_kobert_model()
-# sequence_output, pooled_output = bert_model(input_ids, input_mask,
-#                                             token_type_ids)
-# pooled_output.shape
-
-# tok_path = get_tokenizer()
-# sp = SentencepieceTokenizer(tok_path)
-# sp('한국어 모델을 공유합니다.')
-# ['▁한국', '어', '▁모델', '을', '▁공유', '합니다', '.']
-
-# tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-# model = BertModel.from_pretrained('bert-base-uncased')
-# input_ids = torch.tensor(tokenizer.encode("Hello, my dog is cute")).unsqueeze(
-#     0)  # Batch size 1
-# outputs = model(input_ids)
-# last_hidden_states = outputs[
-#     0]  # The last hidden-state is the first element of the output tuple
-
-bert_model, vocab = get_pytorch_kobert_model("cuda:0")
-bert_tokenizer = nlp.data.BERTSPTokenizer(get_tokenizer(), vocab, lower=False)
-transform = nlp.data.BERTSentenceTransform(bert_tokenizer,
-                                           max_seq_length=512,
-                                           pad=True,
-                                           pair=False)
-
+# import os
 import pdb
-pdb.set_trace()
+import gensim
+# import torch
+# import gluonnlp as nlp
+# from kobert.utils import get_tokenizer
+# from gluonnlp.data import SentencepieceTokenizer
+# from kobert.pytorch_kobert import get_pytorch_kobert_model
+from gensim.models.keyedvectors import KeyedVectors
 
-# print(transform("한국어 모델을 공유합니다"))
+# print(spaced_sent['sent'])
+
+# pdb.set_trace()
+
+# device = "cuda:0"
+# os.environ["CUDA_VISIBLE_DEVICES"] = '0, 1, 2, 3'
+# bert_model, vocab = get_pytorch_kobert_model(device)
+# bert_model = torch.nn.DataParallel(bert_model, output_device=0)
+
+# bert_tokenizer = nlp.data.BERTSPTokenizer(get_tokenizer(), vocab, lower=False)
+# transform = nlp.data.BERTSentenceTransform(bert_tokenizer,
+#                                            max_seq_length=512,
+#                                            pad=True,
+#                                            pair=False)
+
+model_bin = KeyedVectors.load("ko.bin")
+
+print(len(model_bin["안녕"]))
+
+# with open("res.txt", "r") as f:
+#     for i, line in enumerate(f.readlines()):
+#         id, title, _, _ = line.strip().split("@@@@")
+
+#         sentence_list = [title.strip()]
+
+#         if os.path.exists("articles/" + id + ".txt"):
+#             with open("articles/" + id + ".txt", "r") as g:
+#                 sentences = g.readlines()
+#                 if len(sentences) < 3:
+#                     continue
+#                 for sentence in sentences:
+#                     sentence_list.append(sentence.strip())
+
+#             # batch = []
+#             # len_info = []
+#             # for sentence in sentence_list:
+#             #     batch.append(transform(sentence)[0])
+#             #     len_info.append(len(bert_tokenizer(sentence)))
+#             # batch = torch.LongTensor(batch).to(device)
+#             # with torch.no_grad():
+#             #     output = bert_model(batch)[0]
+
+#             # batch_vectors = []
+#             # for i in range(len(batch)):
+#             #     # batch_vectors.append(output[i][1:1 + len_info[i], :])
+#             #     # pdb.set_trace()
+#             #     batch_vectors.append(
+#             #         torch.sum(output[i][1:1 + len_info[i], :], dim=0) /
+#             #         len_info[i])
+
+#             pdb.set_trace()
