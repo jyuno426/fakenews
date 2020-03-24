@@ -1,0 +1,1 @@
+JBWEB000065: HTTP Status 400 - JBWEB000065: HTTP Status 400 - JBWEB000309: type JBWEB000067: Status reportJBWEB000068: message JBWEB000069: description JBWEB000120: The request sent by the client was syntactically incorrect.

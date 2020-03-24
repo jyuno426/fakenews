@@ -1,8 +1,9 @@
 # -*- coding:utf-8 -*-
 
+import re
+import kss
 import requests
 from bs4 import BeautifulSoup
-from selenium import webdriver
 
 
 def crawl_raw_html(url):
@@ -11,9 +12,10 @@ def crawl_raw_html(url):
     timeout 15초
     무조건 크롤링 성공시켜야하나???
     """
+    # return requests.get(url, timeout=15).text
     while True:
         try:
-            return requests.get(url, timeout=15).text
+            return requests.get(url, timeout=5).text
         except TimeoutError:
             pass
         except Exception as e:
@@ -25,6 +27,10 @@ def beautifulize(raw_html):
     raw html text를 BeautifulSoup 객체로 변환 (파싱)
     """
     return BeautifulSoup(raw_html, "lxml")
+
+
+def normalize(text):
+    return " ".join(text.strip().replace('"', "").replace("'", "").split())
 
 
 def crawl_snu_factcheck():
@@ -71,11 +77,8 @@ def crawl_snu_factcheck():
 
             detail_url = base_url + content.find("a")["href"]
             detail_content = beautifulize(crawl_raw_html(detail_url))
-            title = (
-                detail_content.find("div", {"class": "fcItem_detail_li_p"})
-                .find("a")
-                .text.replace("\n", " ")
-                .strip()
+            title = normalize(
+                detail_content.find("div", {"class": "fcItem_detail_li_p"}).find("a")
             )
 
             ind = "@@@@"
@@ -86,23 +89,28 @@ def crawl_snu_factcheck():
 
 
 def get_article():
-    try:
-        driver = webdriver.Chrome("./chromedriver")
-    except:
-        driver = webdriver.Chrome("./chromedriver.exe")
-    driver.implicitly_wait(5)
-
     with open("res.txt", "r") as f:
-        for line in f.readlines():
+        lines = f.readlines()
+        for i, line in enumerate(lines):
+            print(i + 1, "/", len(lines))
             id, _, _, reference_url = line.strip().split("@@@@")
+
+            import os
+
+            if os.path.exists("articles/" + id + ".txt"):
+                continue
+
+            try:
+                soup = beautifulize(crawl_raw_html(reference_url))
+            except:
+                continue
+
             with open("articles/" + id + ".txt", "w") as g:
-                # try:
-                driver.get(reference_url)
-                text = driver.find_element_by_tag_name("body").text.replace("\n", " ")
-                g.write(text + "\n")
-                # except:
-                driver.quit()
-                break
+                for elem in soup.find_all(["script", "style"]):
+                    elem.extract()
+                text = normalize(soup.get_text())
+                for sentence in kss.split_sentences(text):
+                    g.write(sentence + "\n")
 
 
 if __name__ == "__main__":
