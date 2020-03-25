@@ -69,7 +69,8 @@ def crawl_snu_factcheck():
             reference_url = ""
             # reference_content = ""
             try:
-                reference_url = content.find("a", {"class": "reference"})["href"]
+                reference_url = content.find("a",
+                                             {"class": "reference"})["href"]
                 # reference_content = beautifulize(
                 #     crawl_raw_html(reference_url)).text
             except TypeError:
@@ -78,14 +79,14 @@ def crawl_snu_factcheck():
             detail_url = base_url + content.find("a")["href"]
             detail_content = beautifulize(crawl_raw_html(detail_url))
             title = normalize(
-                detail_content.find("div", {"class": "fcItem_detail_li_p"}).find("a")
-            )
+                detail_content.find("div", {
+                    "class": "fcItem_detail_li_p"
+                }).find("a"))
 
             ind = "@@@@"
             with open("res.txt", "a+") as f:
-                f.write(
-                    id + ind + title + ind + str(score) + ind + reference_url + "\n"
-                )
+                f.write(id + ind + title + ind + str(score) + ind +
+                        reference_url + "\n")
 
 
 def get_article():
